@@ -67,7 +67,10 @@
  *
  */
 (function($) {
-  $.facebox = function(data, klass) {
+  $.facebox = function(data, klass, settings) {
+	if(settings)
+		jQuery.extend($.facebox.settings, settings)
+		
     $.facebox.loading()
 
     if (data.ajax) fillFaceboxFromAjax(data.ajax, klass)
@@ -76,17 +79,17 @@
     else if ($.isFunction(data)) data.call($)
     else $.facebox.reveal(data, klass)
   }
-
-  /*
-   * Public, $.facebox methods
-   */
-
-  $.extend($.facebox, {
-    settings: {
+  
+  $.facebox.defaultSettings = {
       opacity      : 0,
       overlay      : true,
       loadingImage : '/facebox/loading.gif',
       closeImage   : '/facebox/closelabel.gif',
+      // Optional markup to make a completely custom close button.
+      closeButton: '\
+	  	<a href="#" class="close"> \
+	  		<img src="/facebox/closelabel.gif" title="close" class="close_image" /> \
+		</a>',
       imageTypes   : [ 'png', 'jpg', 'jpeg', 'gif' ],
       faceboxHtml  : '\
     <div id="facebox" style="display:none;"> \
@@ -102,9 +105,6 @@
                 <div class="content"> \
                 </div> \
                 <div class="footer"> \
-                  <a href="#" class="close"> \
-                    <img src="/facebox/closelabel.gif" title="close" class="close_image" /> \
-                  </a> \
                 </div> \
               </td> \
               <td class="b"/> \
@@ -116,8 +116,14 @@
         </table> \
       </div> \
     </div>'
-    },
+  };
 
+  /*
+   * Public, $.facebox methods
+   */
+
+  $.extend($.facebox, {
+    settings:$.facebox.defaultSettings,
     loading: function() {
       init()
       if ($('#facebox .loading').length == 1) return true
@@ -196,7 +202,9 @@
 
     if (settings) $.extend($.facebox.settings, settings)
     $('body').append($.facebox.settings.faceboxHtml)
-
+    
+    $('#facebox .footer').append($.facebox.settings.closeButton)
+    
     var preload = [ new Image(), new Image() ]
     preload[0].src = $.facebox.settings.closeImage
     preload[1].src = $.facebox.settings.loadingImage
